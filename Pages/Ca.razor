@@ -1,0 +1,154 @@
+@page "/Gameoflife"
+@* @using System.Timers;
+@using System.Diagnostics; *@
+@inject IJSRuntime JS
+
+<div class="d-flex justify-content-between">
+    <div>
+        <button class="btn btn-sm fw-bold" style="background-color: limegreen;" @onclick="Start">Start</button>
+        <button class="btn btn-sm fw-bold" style="background-color: crimson;" @onclick="Stop">Stop</button>
+        <button class="btn btn-sm fw-bold" style="background-color: aquamarine;" @onclick="Reset">Reset</button>
+        <button class="btn btn-sm fw-bold" style="background-color: chocolate;" @onclick="Randomize">Random</button>
+    </div>
+    <div>
+        @if(isRunning){
+            <p class="text-success m-0"><em>running...</em></p>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-center">
+            <table style="border-collapse: collapse;">
+                @for(int i = 0; i < Row; i++){
+                    <tr>
+                        @for(int j = 0; j < Col; j++){
+                            var row = i;
+                            var col = j;
+                            <td 
+                                class="cell @(Grid[row,col] ? "alive" : "dead")"
+                                @onclick="() => ToggleCell(row,col)">
+                            </td>
+                        }
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+<style>
+    .cell {
+    width: 10px;
+    height: 10px;
+    @* border: 1px solid black; *@
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+    td{
+        padding: 0;
+    }
+    .alive {
+        background-color: white;
+    }
+    .dead {
+        background-color: black;
+    }
+</style>
+
+@code{
+    private int Row = 50;
+    private int Col = 50;
+    bool[,] Grid;
+    bool[,] NextGrid;
+    private bool isRunning = false;
+
+    protected override void OnInitialized()
+    {
+        Grid = new bool[Row, Col];
+        NextGrid = new bool[Row, Col];
+    }
+    private async Task Start()
+    {
+        if (!isRunning)
+        {
+            isRunning = true;
+            await RunLoop();
+        }
+    }
+
+    private void Stop()
+    {
+        isRunning = false;
+    }
+
+    private void Reset()
+    {
+        Grid = new bool[Row, Col];
+        NextGrid = new bool[Row, Col];
+        isRunning = false;
+    }
+
+    private void Randomize()
+    {
+        var rand = new Random();
+        for (int y = 0; y < Row; y++)
+            for (int x = 0; x < Col; x++)
+                Grid[y, x] = rand.NextDouble() < 0.5;
+    }
+
+    private async Task RunLoop()
+    {
+        while (isRunning)
+        {
+            Update();
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(200);
+        }
+    }
+
+    private void ToggleCell(int i, int j){
+        if (i >= 0 && i < Row && j >= 0 && j < Col)
+        {
+            Grid[i,j] = !Grid[i,j];
+            StateHasChanged();
+        }
+    }
+    private void Update(){
+        for(int i = 0; i< Row;i++){
+            for(int j = 0; j< Col;j++){
+                int alive = CountNeighbours(j,i);
+                bool Current = Grid[i,j];
+                NextGrid[i,j] = Current switch{
+                    true when alive < 2 => false,
+                    true when alive == 2 || alive == 3 => true,
+                    true when alive > 3 => false,
+                    false when alive == 3 => true,
+                    _=> Current
+                };
+            }
+        }
+        (Grid,NextGrid) = (NextGrid,Grid);
+        InvokeAsync(StateHasChanged);
+    }
+
+    int CountNeighbours(int j, int i){
+        int count = 0;
+        for(int di = -1;di <= 1;di++){
+            for(int dj = -1;dj <= 1;dj++){
+                if(dj == 0 && di == 0){
+                    continue;
+                }
+                int nj = j+dj;
+                int ni = i+di;
+                if(nj >= 0 && nj < Col && ni >= 0 && ni < Row){
+                    if(Grid[ni,nj]){
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+}    

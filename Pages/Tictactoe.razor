@@ -1,0 +1,232 @@
+@page "/"
+
+@if(Winner != null){
+    <p>Winner: @Winner</p>
+}
+else if(Message != null){
+    <p>Game: @Message</p>
+}
+else{
+    <p>Current Player: @CurrentPlayer</p>
+}
+
+<label>Select game mode: </label>
+<select class="form-select rounded-pill" @onchange="SetMode">
+    <option value="PvP" selected="@((Mode == GameMode.PvP).ToString())">Player vs Player</option>
+    <option value="PvC" selected="@((Mode == GameMode.PvC).ToString())">Player vs Computer</option>
+</select>
+<div class="card">
+    <div class="card-body d-flex justify-content-center">
+        <table>
+            @for(int i=0; i<3; i++){
+                <tr>
+                    @for(int j=0; j<3; j++){
+                        var row = i;
+                        var col = j;
+                        <td class="border-4" style="border: 1px solid black; width: 80px; height: 80px; text-align: center; font-size: 28px;">
+                            <button class="text-dark" @onclick="async () => await MakeMove(row,col)" disabled="@(!string.IsNullOrEmpty(Board[row,col]) || Winner != null)"
+                                style="width: 100%; height: 100%; background: transparent; border: none; font-size: 28px;">@Board[row,col]</button>
+                        </td>
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+    <div class="card-footer d-flex justify-content-end">
+        <button class="btn btn-danger btn-sm fw-bold" @onclick="Reset">Reset</button>
+    </div>
+</div>
+
+@code{
+
+    public enum GameMode{
+        PvC,
+        PvP
+    }
+    public string[,] Board {get; set;} = new string[3,3];
+    public string CurrentPlayer {get; set;} = "X";
+    public string Winner {get; set;}
+    public string Message {get; set;}
+
+    public GameMode Mode {get; set;} = GameMode.PvC;
+
+    private async Task MakeMove(int row, int col){
+        if(string.IsNullOrEmpty(Board[row,col]) && Winner == null){
+            Board[row,col] = CurrentPlayer;
+            if(CheckWinner(row,col)){
+                Winner = CurrentPlayer;
+            }
+            else if(IsBoardFull(Board)){
+                Message = "Draw";
+            }
+            else{
+                if(Mode == GameMode.PvC && CurrentPlayer == "X"){
+                    CurrentPlayer = "O";
+                    Message = "Computer is making move...";
+                    StateHasChanged();
+                    await Task.Delay(50);
+
+                    var move = FirstBestMove();
+                    if(move.Row != -1 && move.Col != -1){
+                        Board[move.Row,move.Col] = "O";
+                        if(CheckBoardWinner("O")){
+                            Winner = "O";
+                            Message = null;
+                            return;
+                        }
+                        else if(IsBoardFull(Board)){
+                            Message = "Draw";
+                            return;
+                        }
+
+                        CurrentPlayer = "X";
+                        Message = null;
+                    }
+                }
+                else{
+                    CurrentPlayer = CurrentPlayer == "X" ? "O" : "X";
+                }
+            }
+        }
+    }
+    private bool CheckWinner(int row, int col){
+
+        if(Board[row,0] == CurrentPlayer && Board[row,1] == CurrentPlayer && Board[row,2] == CurrentPlayer){
+            return true;
+        }
+        if(Board[0,col] == CurrentPlayer && Board[1,col] == CurrentPlayer && Board[2,col] == CurrentPlayer){
+                return true;
+            }
+        
+        if((Board[0,0] == CurrentPlayer && Board[1,1] == CurrentPlayer && Board[2,2] == CurrentPlayer)||
+        (Board[0,2] == CurrentPlayer && Board[1,1] == CurrentPlayer && Board[2,0] == CurrentPlayer)){
+            return true;
+        }
+        return false;
+    }
+
+    private bool IsBoardFull(string[,] board){
+        for(int i=0; i<3; i++){
+            for(int j=0; j<3; j++){
+                if(board[i,j] == null){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void Reset(){
+        Board = new string[3,3];
+        CurrentPlayer = "X";
+        Winner = null;
+        Message = null;
+    }
+
+    private void SetMode(ChangeEventArgs e){
+        string selected = e.Value.ToString();
+
+        if(selected == "PvP"){
+            Mode = GameMode.PvP;
+        }
+        else{
+            Mode = GameMode.PvC;
+        }
+        Reset();
+    }
+
+    private bool CheckBoardWinner(string player){
+        for(int i= 0; i<3; i++){
+            if((Board[i,0] == player && Board[i,1] == player && Board[i,2] == player)||
+            (Board[0,i] == player && Board[1,i] == player && Board[2,i] == player)){
+                return true;
+            }
+        }
+        if((Board[0,0] == player && Board[1,1] == player && Board[2,2] == player)||
+        (Board[0,2] == player && Board[1,1] == player && Board[2,0] == player)){
+            return true;
+        }
+        return false;
+    }
+
+    public class Move{
+        public int Row {get; set;}
+        public int Col {get; set;}
+
+        public Move(int row, int col){
+            Row = row;
+            Col = col;
+        }
+    }
+
+    private Move FirstBestMove(){
+        int bestScore = int.MinValue;
+        Move bestMove = null;
+
+        for(int i=0; i<3; i++){
+            for(int j=0; j<3; j++){
+                if(string.IsNullOrEmpty(Board[i,j])){
+                    Board[i,j] = "O";
+                    int score = Minimax(Board,0,false,int.MinValue, int.MaxValue);
+                    Board[i,j] = null;
+
+                    if(score > bestScore){
+                        bestScore = score;
+                        bestMove = new Move(i,j);
+                    }
+                }
+            }
+        }
+        return bestMove;
+    }
+
+    private int Minimax(string[,] board, int depth, bool isMaximizing, int alpha, int beta){
+        if(CheckBoardWinner("O")){
+            return 10 - depth;
+        }
+        if(CheckBoardWinner("X")){
+            return depth - 10;
+        }
+        if(IsBoardFull(board)){
+            return 0;
+        }
+
+        if(isMaximizing){
+            int maxEval = int.MinValue;
+            for(int i=0; i<3; i++){
+                for(int j=0; j<3; j++){
+                    if(string.IsNullOrEmpty(board[i,j])){
+                        board[i,j] = "O";
+                        int eval = Minimax(board,depth+1,false, alpha, beta);
+                        board[i,j] = null;
+                        maxEval = Math.Max(maxEval,eval);
+                        alpha = Math.Max(alpha,maxEval);
+
+                        if(beta <= alpha){
+                            break;
+                        }
+                    }
+                }
+            }
+            return maxEval;
+        }
+        else{
+            int minEval = int.MaxValue;
+            for(int i=0; i<3; i++){
+                for(int j=0; j<3; j++){
+                    if(string.IsNullOrEmpty(board[i,j])){
+                        board[i,j] ="X";
+                        int eval = Minimax(board, depth+1,true,alpha,beta);
+                        board[i,j] = null;
+                        minEval = Math.Min(minEval,eval);
+                        beta = Math.Min(alpha,minEval);
+                        if(beta <= alpha){
+                            break;
+                        }
+                    }
+                }
+            }
+            return minEval;
+        }
+    }
+}
