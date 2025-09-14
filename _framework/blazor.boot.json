@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "GameVault",
   "resources": {
-    "hash": "sha256-uiOSgChK9Kdrju52y8oPEwOFt89j3p4ldX9t3KqtlwQ=",
+    "hash": "sha256-Q0LXH5my99FyAbw6xT/j4C//dTnJveRM5PI+2OJIsn0=",
     "jsModuleNative": {
       "dotnet.native.8.0.15.enb4oz5nkf.js": "sha256-ftpNqtARtVNE8ku5eB/jXoklb41UQ+EutUHfwmbNTBY="
     },
@@ -19,7 +19,7 @@
     "assembly": {
       "Blazor.Extensions.Canvas.JS.wasm": "sha256-ctyeKHsvFswpiKQJpTUUWdSrDGr4UNirukOrWYnwW78=",
       "Blazor.Extensions.Canvas.wasm": "sha256-2AOrAB5tgoiK9wMMmwiE/pKPAtTjzgFudxSl6g4dt9s=",
-      "GameVault.wasm": "sha256-OpQhP+Es+xBVG6iZ+CXwa09MIxfLrVQV64VwLVLY9lc=",
+      "GameVault.wasm": "sha256-E9wab5XWPyyknPRFYzK4+4hW0q+6dCLMZe8ZBv8s+EQ=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-pTlaxOzA9Mnw6lmMm7Sz8dicwPZ30D02Zwq4KsTSwOo=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-6H6sw6DPC/l2ZCZQ6FDUbgopODrSc3TILZkNKjEFApw=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-fBqw1fwDIGHXEilpEF3XAl1GEIGrg/Mee9XcqCb473o=",
