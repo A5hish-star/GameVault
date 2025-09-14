@@ -20,7 +20,7 @@
 <div class="card">
     <div class="card-body">
         <div class="d-flex justify-content-center">
-            <table style="border-collapse: collapse;">
+            <table style="border-collapse: collapse;" class="border border-5">
                 @for(int i = 0; i < Row; i++){
                     <tr>
                         @for(int j = 0; j < Col; j++){
@@ -39,8 +39,8 @@
 </div>
 <style>
     .cell {
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
     @* border: 1px solid black; *@
     padding: 0;
     margin: 0;
@@ -59,7 +59,7 @@
 
 @code{
     private int Row = 50;
-    private int Col = 50;
+    private int Col = 120;
     bool[,] Grid;
     bool[,] NextGrid;
     private bool isRunning = false;

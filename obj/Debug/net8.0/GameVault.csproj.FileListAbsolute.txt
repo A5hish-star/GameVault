@@ -2080,3 +2080,4 @@
 /home/ashish/Downloads/GameVault/obj/Debug/net8.0/refint/GameVault.dll
 /home/ashish/Downloads/GameVault/obj/Debug/net8.0/GameVault.pdb
 /home/ashish/Downloads/GameVault/obj/Debug/net8.0/ref/GameVault.dll
+/home/ashish/Downloads/GameVault/obj/Debug/net8.0/GameVault.sourcelink.json

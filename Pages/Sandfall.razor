@@ -1,0 +1,215 @@
+@page "/Sandfall"
+
+<style>
+    .cell{
+        width: 7px;
+        height: 7px;
+        @* border: 1px solid black; *@
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        touch-action: none;
+    }
+    .alive{
+        background-color: black;
+    }
+    .dead{
+        background-color: white;
+    }
+    .sand { background-color: goldenrod; }
+    .water { background-color: deepskyblue; }
+    .dead { background-color: white; }
+
+</style>
+
+<div class="d-flex justify-content-between">
+    <div>
+        <button class="btn btn-sm border border-1 fw-bold" style="background-color: limegreen;" @onclick="() => isRunning = true">Start</button>
+        <button class="btn btn-sm border border-1 fw-bold" style="background-color: crimson;" @onclick="() => isRunning = false">Stop</button>
+        <button class="btn btn-sm border border-1 fw-bold" style="background-color: aquamarine;" @onclick="Reset">Reset</button>
+        @* <button></button> *@
+    </div>
+    <div>
+        @if(isRunning){
+            <p class="text-success m-0"><em>running...</em></p>
+        }
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-center">
+            <table style="border-collapse: collapse;" class="border border-5">
+                @for(int i=0;i<row;i++)
+                {
+                    <tr>
+                        @for(int j=0;j<col;j++)
+                        {
+                            int r1 = i;
+                            int c1 = j;
+                            @* <td class="cell @(grid[r1,c1] == CellType.Sand? "alive":"dead")" @onmousemove="()=>AddSand(r1,c1)"></td> *@
+                            <td class="cell 
+                                @(grid[r1,c1] == CellType.Sand ? "sand" : 
+                                grid[r1,c1] == CellType.Water ? "water" : "dead")"
+                                @onmousemove="()=>AddSand(r1,c1)" @onpointermove="()=>AddSand(r1,c1)">
+                            </td>
+                        }
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="card-footer">
+             <button class="btn btn-sm border border-1 fw-bold" style="background-color: goldenrod;" @onclick="() => currentBrush = CellType.Sand">Sand</button>
+             <button class="btn btn-sm border border-1 fw-bold" style="background-color: deepskyblue;" @onclick="() => currentBrush = CellType.Water">Water</button>
+             <button class="btn btn-sm border border-1 fw-bold" style="background-color: whitesmoke;" @onclick="() => currentBrush = CellType.Empty">Eraser</button>
+
+             <span style="margin-left:15px;">Brush Size:</span>
+            <button class="btn btn-sm border border-1 fw-bold" style="background-color: lightyellow;" @onclick="() => brushSize = 0">1x</button>
+            <button class="btn btn-sm border border-1 fw-bold" style="background-color: lightyellow;" @onclick="() => brushSize = 1">2x</button>
+            <button class="btn btn-sm border border-1 fw-bold" style="background-color: lightyellow;" @onclick="() => brushSize = 2">4x</button>
+        </div>
+    </div>
+</div>
+
+@code{
+    enum CellType{
+        Empty,
+        Sand,
+        Water
+    }
+    private int row = 60;
+    private int col = 150;
+    CellType [,] grid;
+    CellType [,] nextgrid;
+    private bool isRunning;
+    private int brushSize = 0;
+    private CellType currentBrush = CellType.Sand;
+
+    protected override async Task OnInitializedAsync()
+    {
+        grid = new CellType[row, col];
+        nextgrid = new CellType[row, col];
+
+        _ = Task.Run(async () =>
+        {
+            while (true)
+            {
+                if(isRunning){
+                    UpdateWorld();
+                    InvokeAsync(StateHasChanged); // UI update from background thread
+                }
+                await Task.Delay(10); // adjust for speed (lower = faster)
+            }
+        });
+    }
+    private async Task Run()
+    {
+        isRunning = true;
+        while (isRunning)
+        {
+            for(int step = 0; step < 2; step++){
+                UpdateWorld();
+            }
+            StateHasChanged();
+            await Task.Delay(16); // speed
+        }
+    }
+
+    private void Reset(){
+        grid = new CellType[row,col];
+        nextgrid = new CellType[row,col];
+        isRunning = false;
+    }
+
+    private void Stop()
+    {
+        isRunning = false;
+    }
+
+    private void AddSand(int i, int j)
+    {
+        if(!isRunning){
+            return;
+        }
+        @* int brushSize = 0; *@
+        for (int di = -brushSize; di <= brushSize; di++)
+        {
+            for (int dj = -brushSize; dj <= brushSize; dj++)
+            {
+                int ni = i + di;
+                int nj = j + dj;
+                if (ni >= 0 && ni < row && nj >= 0 && nj < col)
+                {
+                    grid[ni, nj] = currentBrush;
+                }
+            }
+        }
+    }
+    
+    private void UpdateWorld()
+    {
+        for (int i = row - 2; i >= 0; i--)
+        {
+            for (int j = 0; j < col; j++)
+            {
+                if (grid[i, j] == CellType.Sand)
+                {
+                    // Sand falls straight down
+                    if (grid[i + 1, j] == CellType.Empty)
+                    {
+                        grid[i + 1, j] = CellType.Sand;
+                        grid[i, j] = CellType.Empty;
+                    }
+                    else if (j > 0 && grid[i + 1, j - 1] == CellType.Empty)
+                    {
+                        grid[i + 1, j - 1] = CellType.Sand;
+                        grid[i, j] = CellType.Empty;
+                    }
+                    else if (j < col - 1 && grid[i + 1, j + 1] == CellType.Empty)
+                    {
+                        grid[i + 1, j + 1] = CellType.Sand;
+                        grid[i, j] = CellType.Empty;
+                    }
+                }
+                else if (grid[i, j] == CellType.Water)
+                {
+                    // Water falls down
+                    if (grid[i + 1, j] == CellType.Empty)
+                    {
+                        grid[i + 1, j] = CellType.Water;
+                        grid[i, j] = CellType.Empty;
+                    }
+                    // Water can flow diagonally
+                    else if (j > 0 && grid[i + 1, j - 1] == CellType.Empty)
+                    {
+                        grid[i + 1, j - 1] = CellType.Water;
+                        grid[i, j] = CellType.Empty;
+                    }
+                    else if (j < col - 1 && grid[i + 1, j + 1] == CellType.Empty)
+                    {
+                        grid[i + 1, j + 1] = CellType.Water;
+                        grid[i, j] = CellType.Empty;
+                    }
+                    // Water flows sideways if blocked
+                    else if (j > 0 && grid[i, j - 1] == CellType.Empty)
+                    {
+                        grid[i, j - 1] = CellType.Water;
+                        grid[i, j] = CellType.Empty;
+                    }
+                    else if (j < col - 1 && grid[i, j + 1] == CellType.Empty)
+                    {
+                        grid[i, j + 1] = CellType.Water;
+                        grid[i, j] = CellType.Empty;
+                    }
+                }
+            }
+        }
+    }
+
+
+    private void ToggleCell(int i,int j){
+        if(i >= 0 && i < row && j >= 0 && j < col){
+            grid[i,j] = grid[i,j] == CellType.Empty?CellType.Sand:CellType.Empty;
+            StateHasChanged();
+        }
+    }
+}

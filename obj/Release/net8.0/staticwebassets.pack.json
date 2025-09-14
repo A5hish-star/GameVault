@@ -1,0 +1,57 @@
+{
+  "Files": [
+    {
+      "Id": "/home/ashish/Downloads/GameVault/bin/Release/net8.0/wwwroot/_framework/blazor.webassembly.js",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/obj/Release/net8.0/compressed/tme6m7fqq9.gz",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/obj/Release/net8.0/scopedcss/bundle/GameVault.styles.css",
+      "PackagePath": "staticwebassets/GameVault.styles.css"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/wwwroot/css/app.css",
+      "PackagePath": "staticwebassets/css/app.css"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/wwwroot/css/bootstrap/bootstrap.min.css",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/wwwroot/css/bootstrap/bootstrap.min.css.map",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css.map"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/wwwroot/favicon.png",
+      "PackagePath": "staticwebassets/favicon.png"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/wwwroot/icon-192.png",
+      "PackagePath": "staticwebassets/icon-192.png"
+    },
+    {
+      "Id": "/home/ashish/Downloads/GameVault/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.GameVault.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.build.GameVault.props",
+      "PackagePath": "build\\GameVault.props"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.buildMultiTargeting.GameVault.props",
+      "PackagePath": "buildMultiTargeting\\GameVault.props"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.buildTransitive.GameVault.props",
+      "PackagePath": "buildTransitive\\GameVault.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
